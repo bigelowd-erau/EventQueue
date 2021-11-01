@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Events;
+using UnityEngine;
 
 public class EventBus : Singleton<EventBus>
 {
@@ -56,7 +57,8 @@ public class EventBus : Singleton<EventBus>
         UnityEvent thisEvent = null;
         if (Instance.m_EventDictionary.TryGetValue(eventName, out thisEvent))
         {
-            EventQueue.EnqueueEvent(eventName, thisEvent);
+            //Debug.Log(1);
+            EventQueue.HandleEvent(eventName, thisEvent);
         }
     }
 

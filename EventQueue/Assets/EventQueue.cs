@@ -2,15 +2,21 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
 
-public class EventQueue : Singleton<EventQueue>
+public abstract class EventQueue : Singleton<EventQueue>
 {
-    private Dictionary<string, Queue<UnityEvent>> m_EventQueue;
-    float curTime = 0.0f;
+    //private Dictionary<string, Queue<UnityEvent>> m_EventQueue;
+    protected float curTime = 0.0f;
     //Item1 is previous fire time, item
-    private float missleLastFireTime;
+    /*private float missleLastFireTime;
     private const float missleDelay = 1.5f;
     private float cannonLastFireTime;
-    private const float cannonFireReloadDelay = 2.0f;
+    private const float cannonFireReloadDelay = 2.0f;*/
+
+    //test code
+    protected Queue<(string, UnityEvent)> m_EventQueue;
+
+
+
     public override void Awake()
     {
         base.Awake();
@@ -20,65 +26,89 @@ public class EventQueue : Singleton<EventQueue>
     {
         if (Instance.m_EventQueue == null)
         {
-            Instance.m_EventQueue = new Dictionary<string, Queue<UnityEvent>>();
+            //Instance.m_EventQueue = new Dictionary<string, Queue<UnityEvent>>();
+            Instance.m_EventQueue = new Queue<(string, UnityEvent)>();
         }
     }
-
-    public static void EnqueueEvent(string eventName, UnityEvent newEvent)
+    public static void HandleEvent(string eventName, UnityEvent newEvent)
     {
-        Queue<UnityEvent> thisEventQueue;
-        if (Instance.m_EventQueue.TryGetValue(eventName, out thisEventQueue))
+        //Debug.Log(2);
+        //Instance.m_EventQueue.Enqueue((eventName, newEvent));
+        if (eventName == "Fire" || eventName == "Reload")
         {
-            //Debug.Log(1);
-            thisEventQueue.Enqueue(newEvent);
-        }
-        else
-        {
-            //Debug.Log(2);
-            thisEventQueue = new Queue<UnityEvent>();
-            thisEventQueue.Enqueue(newEvent);
-            Instance.m_EventQueue.Add(eventName, thisEventQueue);
+        //Debug.Log(3);
+            FireReloadEventQueue.EnqueueEvent(eventName, newEvent);
         }
     }
 
-    public void FixedUpdate()
+    protected static void EnqueueEvent(string eventName, UnityEvent newEvent)
+    {
+       // Debug.Log(4);
+
+        Instance.m_EventQueue.Enqueue((eventName, newEvent));
+    }
+
+    public virtual void FixedUpdate()
     {
         curTime += Time.deltaTime;
-        ShootMissle();
-        FireCannon();
     }
 
-    private void ShootMissle()
-    {
-        if (missleLastFireTime + missleDelay < curTime)
+        /*
+        public static void EnqueueEvent(string eventName, UnityEvent newEvent)
         {
             Queue<UnityEvent> thisEventQueue;
-            if (Instance.m_EventQueue.TryGetValue("Shoot", out thisEventQueue))
+            if (Instance.m_EventQueue.TryGetValue(eventName, out thisEventQueue))
             {
-            //Debug.Log(3);
-                if (thisEventQueue.Count > 0)
+                //Debug.Log(1);
+                thisEventQueue.Enqueue(newEvent);
+            }
+            else
+            {
+                //Debug.Log(2);
+                thisEventQueue = new Queue<UnityEvent>();
+                thisEventQueue.Enqueue(newEvent);
+                Instance.m_EventQueue.Add(eventName, thisEventQueue);
+            }
+        }
+
+        public void FixedUpdate()
+        {
+            curTime += Time.deltaTime;
+            ShootMissle();
+            FireCannon();
+        }
+
+        private void ShootMissle()
+        {
+            if (missleLastFireTime + missleDelay < curTime)
+            {
+                Queue<UnityEvent> thisEventQueue;
+                if (Instance.m_EventQueue.TryGetValue("Shoot", out thisEventQueue))
                 {
-            //Debug.Log(4);
-                    thisEventQueue.Dequeue()?.Invoke();
-                    missleLastFireTime = curTime;
+                //Debug.Log(3);
+                    if (thisEventQueue.Count > 0)
+                    {
+                //Debug.Log(4);
+                        thisEventQueue.Dequeue()?.Invoke();
+                        missleLastFireTime = curTime;
+                    }
                 }
             }
         }
-    }
 
-    private void FireCannon()
-    {
-        if (cannonLastFireTime + cannonFireReloadDelay < curTime)
+        private void FireCannon()
         {
-            Queue<UnityEvent> thisEventQueue;
-            if (Instance.m_EventQueue.TryGetValue("Fire", out thisEventQueue))
+            if (cannonLastFireTime + cannonFireReloadDelay < curTime)
             {
-                if (thisEventQueue.Count > 0)
+                Queue<UnityEvent> thisEventQueue;
+                if (Instance.m_EventQueue.TryGetValue("Fire", out thisEventQueue))
                 {
-                    thisEventQueue.Dequeue().Invoke();
-                    cannonLastFireTime = curTime;
+                    if (thisEventQueue.Count > 0)
+                    {
+                        thisEventQueue.Dequeue().Invoke();
+                        cannonLastFireTime = curTime;
+                    }
                 }
             }
-        }
+        }*/
     }
-}
