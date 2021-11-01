@@ -73,8 +73,11 @@ public class EventQueue : Singleton<EventQueue>
             Queue<UnityEvent> thisEventQueue;
             if (Instance.m_EventQueue.TryGetValue("Fire", out thisEventQueue))
             {
-                thisEventQueue.Dequeue().Invoke();
-                cannonLastFireTime = curTime;
+                if (thisEventQueue.Count > 0)
+                {
+                    thisEventQueue.Dequeue().Invoke();
+                    cannonLastFireTime = curTime;
+                }
             }
         }
     }
