@@ -12,7 +12,7 @@ public class Cannon : MonoBehaviour
     {
         //Invoke("Init", 2f);
         EventBus.StartListening("Fire", Shoot);
-        EventBus.StartListening("Fire", Reload);
+        EventBus.StartListening("Reload", Reload);
     }
     /*
     private void Init()
@@ -30,7 +30,7 @@ public class Cannon : MonoBehaviour
         if (!m_isQuitting)
         {
             EventBus.StopListening("Fire", Shoot);
-            EventBus.StopListening("Fire", Reload);
+            EventBus.StopListening("Reload", Reload);
         }
     }
 
@@ -39,8 +39,9 @@ public class Cannon : MonoBehaviour
         if (m_isLoaded)
         {
             Debug.Log("Recieved a shoot event : shooting cannon!");
-            this.Invoke("flipLoaded", 0.5f);
-            EventBus.HandleNewEvent("Fire");
+            m_isLoaded = false;
+            //this.Invoke("flipLoaded", 0.5f);
+            EventBus.HandleNewEvent("Reload");
         }
     }
 
@@ -48,8 +49,9 @@ public class Cannon : MonoBehaviour
     {
         if (!m_isLoaded)
         {
-            Debug.Log("Recieved a reload event : reloading cannon!");
-            this.Invoke("flipLoaded", 0.5f);
+            Debug.Log("Recieved a reload event : cannon reloaded!");
+            m_isLoaded = true;
+            //this.Invoke("flipLoaded", 0.5f);
         }
     }
 

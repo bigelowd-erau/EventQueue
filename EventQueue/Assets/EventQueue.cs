@@ -36,7 +36,7 @@ public abstract class EventQueue : Singleton<EventQueue>
         //Instance.m_EventQueue.Enqueue((eventName, newEvent));
         if (eventName == "Fire" || eventName == "Reload")
         {
-        //Debug.Log(3);
+            //Debug.Log(eventName);
             FireReloadEventQueue.EnqueueEvent(eventName, newEvent);
         }
     }
