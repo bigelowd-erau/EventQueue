@@ -38,7 +38,9 @@ public abstract class EventQueue : Singleton<EventQueue>
         {
             //Debug.Log(eventName);
             FireReloadEventQueue.EnqueueEvent(eventName, newEvent);
-        }
+        } else if (eventName == "Shoot")
+            ShootEventQueue.EnqueueEvent(eventName, newEvent);
+
     }
 
     protected static void EnqueueEvent(string eventName, UnityEvent newEvent)
