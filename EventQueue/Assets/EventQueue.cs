@@ -1,65 +1,81 @@
-using System.Collections;
-using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Events;
-
-
-public struct EventQueuee
-{
-    bool canProcessThisEvent;
-    float timeBetweenEvents;
-   // Queue<> eventQueue
-   //do i do a queue for the events or do I run same evetn queueed times?
-}
+using System.Collections.Generic;
 
 public class EventQueue : Singleton<EventQueue>
 {
-    private Dictionary<string, UnityEvent> m_EventDictionary;
-    private Dictionary<string, Queue> m_EventQueue;
-
+    private Dictionary<string, Queue<UnityEvent>> m_EventQueue;
+    float curTime = 0.0f;
+    //Item1 is previous fire time, item
+    private float missleLastFireTime;
+    private const float missleDelay = 1.5f;
+    private float cannonLastFireTime;
+    private const float cannonFireReloadDelay = 2.0f;
     public override void Awake()
     {
         base.Awake();
         Instance.Init();
     }
-
     private void Init()
     {
-        if (Instance.m_EventDictionary == null)
+        if (Instance.m_EventQueue == null)
         {
-            Instance.m_EventDictionary = new Dictionary<string, UnityEvent>();
+            Instance.m_EventQueue = new Dictionary<string, Queue<UnityEvent>>();
         }
     }
 
-    public static void StartListening(string eventName, UnityAction listener)
+    public static void EnqueueEvent(string eventName, UnityEvent newEvent)
     {
-        UnityEvent thisEvent = null;
-        if (Instance.m_EventDictionary.TryGetValue(eventName, out thisEvent))
+        Queue<UnityEvent> thisEventQueue;
+        if (Instance.m_EventQueue.TryGetValue(eventName, out thisEventQueue))
         {
-            thisEvent.AddListener(listener);
+            //Debug.Log(1);
+            thisEventQueue.Enqueue(newEvent);
         }
         else
         {
-            thisEvent = new UnityEvent();
-            thisEvent.AddListener(listener);
-            Instance.m_EventDictionary.Add(eventName, thisEvent);
+            //Debug.Log(2);
+            thisEventQueue = new Queue<UnityEvent>();
+            thisEventQueue.Enqueue(newEvent);
+            Instance.m_EventQueue.Add(eventName, thisEventQueue);
         }
     }
 
-    public static void StopListening(string eventName, UnityAction listener)
+    public void FixedUpdate()
     {
-        UnityEvent thisEvent = null;
-        if (Instance.m_EventDictionary.TryGetValue(eventName, out thisEvent))
+        curTime += Time.deltaTime;
+        ShootMissle();
+        FireCannon();
+    }
+
+    private void ShootMissle()
+    {
+        if (missleLastFireTime + missleDelay < curTime)
         {
-            thisEvent.RemoveListener(listener);
+            Queue<UnityEvent> thisEventQueue;
+            if (Instance.m_EventQueue.TryGetValue("Shoot", out thisEventQueue))
+            {
+            //Debug.Log(3);
+                if (thisEventQueue.Count > 0)
+                {
+            //Debug.Log(4);
+                    thisEventQueue.Dequeue()?.Invoke();
+                    missleLastFireTime = curTime;
+                }
+            }
         }
     }
 
-    public static void TriggerEvent(string eventName)
+    private void FireCannon()
     {
-        UnityEvent thisEvent = null;
-        if (Instance.m_EventDictionary.TryGetValue(eventName, out thisEvent))
+        if (cannonLastFireTime + cannonFireReloadDelay < curTime)
         {
-            thisEvent.Invoke();
+            Queue<UnityEvent> thisEventQueue;
+            if (Instance.m_EventQueue.TryGetValue("Fire", out thisEventQueue))
+            {
+                thisEventQueue.Dequeue().Invoke();
+                cannonLastFireTime = curTime;
+            }
         }
     }
 }

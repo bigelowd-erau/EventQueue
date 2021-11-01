@@ -1,18 +1,64 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using UnityEngine.Events;
 
-public class EventBus : MonoBehaviour
+public class EventBus : Singleton<EventBus>
 {
-    // Start is called before the first frame update
-    void Start()
+    private Dictionary<string, UnityEvent> m_EventDictionary;
+
+    public override void Awake()
     {
-        
+        base.Awake();
+        Instance.Init();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Init()
     {
-        
+        if (Instance.m_EventDictionary == null)
+        {
+            Instance.m_EventDictionary = new Dictionary<string, UnityEvent>();
+        }
     }
+
+    public static void StartListening(string eventName, UnityAction listener)
+    {
+        UnityEvent thisEvent;
+        if (Instance.m_EventDictionary.TryGetValue(eventName, out thisEvent))
+        {
+            thisEvent.AddListener(listener);
+        }
+        else
+        {
+            thisEvent = new UnityEvent();
+            thisEvent.AddListener(listener);
+            Instance.m_EventDictionary.Add(eventName, thisEvent);
+        }
+    }
+
+    public static void StopListening(string eventName, UnityAction listener)
+    {
+        UnityEvent thisEvent = null;
+        if (Instance.m_EventDictionary.TryGetValue(eventName, out thisEvent))
+        {
+            thisEvent.RemoveListener(listener);
+        }
+    }
+    
+    public static void TriggerEvent(string eventName)
+    {
+        UnityEvent thisEvent = null;
+        if (Instance.m_EventDictionary.TryGetValue(eventName, out thisEvent))
+            thisEvent.Invoke();
+    }
+
+    public static void HandleNewEvent(string eventName)
+    {
+        UnityEvent thisEvent = null;
+        if (Instance.m_EventDictionary.TryGetValue(eventName, out thisEvent))
+        {
+            EventQueue.EnqueueEvent(eventName, thisEvent);
+        }
+    }
+
+
 }
